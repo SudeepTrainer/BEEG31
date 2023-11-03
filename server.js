@@ -1,4 +1,6 @@
 const http = require('http');
+const queryString = require('querystring');
+const fs = require('fs')
 // const port = process.env.PORT || 1337;
 const server = http.createServer(function(req,res){
     console.log("request listener called");
@@ -8,8 +10,10 @@ const server = http.createServer(function(req,res){
         respondText(req,res)
     }else if(req.url==="/json"){
         respondJson(req,res)
-    }else if (req.url===echo){
+    }else if (req.url.match(/^\/echo/)){
         respondEcho(req,res)
+    }else if (req.url.match(/^\/static/)){
+        respondStatic(req,res)
     }
     else respondNothing(req,res)
 })
@@ -30,4 +34,25 @@ function respondJson(req,res){
 function respondNothing(req,res){
     res.writeHead(404,"Not found");
     res.end("Nothing found")
+}
+
+function respondEcho(req,res){
+    // console.log(req.url.split("?"));
+    // console.log(req.url.split("?").slice(1));
+    // console.log(req.url.split("?").slice(1).join(''));
+    // console.log(queryString.parse(req.url.split("?").slice(1).join('')));
+    const {input} = queryString.parse(req.url.split("?").slice(1).join(''));
+    res.end(JSON.stringify({
+        normal:input,
+        uppercase:input.toUpperCase(),
+        length:input.length
+    }))
+}
+
+function respondStatic(req,res){
+    const filename = `${__dirname}/public${req.url.split()[1]}`
+    console.log(filename);
+    fs.createReadStream(filename)
+        .on('error',()=>respondNothing(req,res))
+        .pipe(res)
 }
