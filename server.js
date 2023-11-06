@@ -10,6 +10,8 @@ const server = http.createServer(function(req,res){
         respondText(req,res)
     }else if(req.url==="/json"){
         respondJson(req,res)
+    }else if(req.url.match(/^\/converttouppercase/)){
+        respondConvert(req,res)
     }else if (req.url.match(/^\/echo/)){
         respondEcho(req,res)
     }else if (req.url.match(/^\/static/)){
@@ -50,9 +52,16 @@ function respondEcho(req,res){
 }
 
 function respondStatic(req,res){
-    const filename = `${__dirname}/public${req.url.split()[1]}`
+    const filename = `${__dirname}/public${req.url.split("/static")[1]}`
     console.log(filename);
     fs.createReadStream(filename)
         .on('error',()=>respondNothing(req,res))
         .pipe(res)
+}
+
+function respondConvert(req,res){
+    // console.log(req.url.split("?")[1]);
+    const {input} = queryString.parse(req.url.split("?")[1]);
+    res.write(input.toUpperCase());
+    res.end();
 }
