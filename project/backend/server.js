@@ -2,27 +2,17 @@ const express = require('express');
 const session = require('express-session');
 const mongoDBSession = require('connect-mongodb-session')(session);
 const mongoose = require('mongoose');
-
 const databaseUri = 'mongodb://127.0.0.1:27017/mydb'
-mongoose.connect(databaseUri)
-    .then(res=>()=>{console.log(`db connected ${res}`)})
-    .catch(err=>()=>{console.log(`Error connecting db ${err}`)})
-const db = mongoose.connection;
-db.on('connected',()=>{
-    console.log("DB connected");
-})
-db.on('error',()=>{
-    console.log("Erorr in connecting");
-})
+db().then(res=>console.log("connected")).catch(err => console.log(err));
+async function db() {
+  await mongoose.connect(databaseUri);
+}
 const store = new mongoDBSession({
     uri:databaseUri,
     collection:"sessions"
 })
-
 const PORT = 3000;
-
 const app = express();
-
 //middleware
 app.use(session({
     secret:'thisisforsigningcookie',
