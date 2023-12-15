@@ -53,6 +53,7 @@ app.get("/register",(req,res)=>{
 })
 
 app.post("/register",async (req,res)=>{
+    console.log(req.body);
     const {username,password} = req.body;
     try{
         // check if the req body has username and password
@@ -66,13 +67,14 @@ app.post("/register",async (req,res)=>{
             return
         }
         // encrypt the password
-        const hashedPassword = bcrypt.hashSync(password,12);
+        const hashedPassword = bcrypt.hashSync(password,10);
         const newUser = new User({
             username,
             password:hashedPassword
         })
         // save to DB
         await newUser.save();
+        // everything goes well, go to login page
         res.status(201).redirect('/login');
     }catch(error){
         console.log(error);
