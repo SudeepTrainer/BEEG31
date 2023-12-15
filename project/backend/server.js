@@ -40,6 +40,10 @@ app.set('view engine','ejs');
 //     store:store
 // }));
 
+app.get("/",(req,res)=>{
+    res.render('home');
+})
+
 // routing
 app.get("/login",(req,res)=>{
     // req.session.isAuth = true;
@@ -47,6 +51,25 @@ app.get("/login",(req,res)=>{
     // console.log(req.session.id);
     res.render('login');
 })
+
+app.post('/login', async (req,res)=>{
+
+    const {username,password} = req.body;
+    try{
+        // check if the user exists 
+        const user = await User.findOne({username});
+        // check for the password
+        if(user && bcrypt.compareSync(password,user.password)){
+            res.cookie('auth',true);
+            res.status(200).redirect('/');
+        }else{
+            res.status(401).render('login',{error:'Please check the username and password'})
+        }
+    }catch(error){
+        console.log(error);
+        res.status(500).render('login',{'error':'Internal server error'})
+    }
+});
 
 app.get("/register",(req,res)=>{
     res.render('register')
