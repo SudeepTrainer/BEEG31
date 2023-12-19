@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser');
 // const session = require('express-session');
 // const mongoDBSession = require('connect-mongodb-session')(session);
 const mongoose = require('mongoose');
+const User = require("./models/user");
+const Product = require("./models/product");
 const databaseUri = 'mongodb://127.0.0.1:27017/mydb'
 db().then(res=>console.log("connected")).catch(err => console.log(err));
 async function db() {
@@ -16,14 +18,6 @@ async function db() {
 const PORT = 3000;
 const app = express();
 
-// Define the user schema
-const userSchema = new mongoose.Schema({
-    username:String,
-    password:String
-})
-
-// create the user model
-const User = mongoose.model("User",userSchema);
 
 //middleware
 app.use(cookieParser());
@@ -60,8 +54,14 @@ const isAuthenticated = (req,res,next)=>{
 //     store:store
 // }));
 
-app.get("/",isAuthenticated,(req,res)=>{
-    res.render('home');
+app.get("/",isAuthenticated,async (req,res)=>{
+    try{
+        const products = await Product.find({});
+        res.render('home',{products});
+    }catch(error){
+        console.log(error);
+        res.status(500).render("home",{"error":"Internal server error"})
+    }
 })
 
 app.get('/logout',(req,res)=>{
