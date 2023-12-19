@@ -29,6 +29,26 @@ const User = mongoose.model("User",userSchema);
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
 app.set('view engine','ejs');
+
+// middleware to be called for all requests
+app.use((req,res,next)=>{
+    const {auth} = req.cookies;
+    if(auth){
+        req.isAuthenticated = true;
+    }else{
+        req.isAuthenticated = false;
+    }
+    next();
+})
+
+const isAuthenticated = (req,res,next)=>{
+    if(req.isAuthenticated){
+        next();
+    }else{
+        res.status(400).redirect("/login");
+    }
+}
+
 // app.use(session({
 //     secret:'thisisforsigningcookie',
 //     resave:false,
@@ -40,8 +60,13 @@ app.set('view engine','ejs');
 //     store:store
 // }));
 
-app.get("/",(req,res)=>{
+app.get("/",isAuthenticated,(req,res)=>{
     res.render('home');
+})
+
+app.get('/logout',(req,res)=>{
+    res.clearCookie("auth");
+    res.status(200).redirect("/login");
 })
 
 // routing
