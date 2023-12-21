@@ -18,7 +18,6 @@ async function db() {
 const PORT = 3000;
 const app = express();
 
-
 //middleware
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
